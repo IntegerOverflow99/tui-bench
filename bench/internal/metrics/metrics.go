@@ -7,7 +7,7 @@ import (
 )
 
 type Report struct {
-	Bytes       uint64            `json:"bytes,omitempty"`
+	BytesWritten uint64           `json:"bytesWritten,omitempty"`
 	Writes      uint64            `json:"writes,omitempty"`
 	Counters    map[string]uint64 `json:"counters,omitempty"`
 	CPU         CPUReport         `json:"cpu,omitempty"`
@@ -36,7 +36,7 @@ type Aggregator struct {
 	measuring bool
 	start    time.Time
 	end      time.Time
-	bytes    uint64
+	bytesWritten uint64
 	writes   uint64
 	counters map[string]uint64
 	// latency matching by seq
@@ -71,7 +71,7 @@ func (a *Aggregator) Add(m map[string]any) {
 	}
 	if kind, _ := m["kind"].(string); kind == "write" {
 		if n, ok := m["n"].(float64); ok {
-			a.bytes += uint64(n)
+			a.bytesWritten += uint64(n)
 		}
 		a.writes++
 	}
@@ -111,7 +111,7 @@ func (a *Aggregator) Report() Report {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	rep := Report{
-		Bytes:       a.bytes,
+	BytesWritten: a.bytesWritten,
 		Writes:      a.writes,
 		Counters:    a.counters,
 		WindowStart: a.start,
