@@ -57,6 +57,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case " ":
 			m.paused = !m.paused
 			instrument.Emit("state", map[string]any{"field": "paused", "value": m.paused, "seq": seq})
+			instrument.SetPendingFlushSeq(seq)
 		}
 	case tickMsg:
 		// render tail
@@ -65,8 +66,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			start = len(m.buf) - m.vp.Height
 		}
 		m.vp.SetContent(strings.Join(m.buf[start:], "\n"))
-		// Mark flush; counting writer emits write, but we add logical flush for triplet
-		instrument.Emit("flush", map[string]any{"seq": fmt.Sprintf("%d", m.seq)})
 		return m, tick()
 	case genMsg:
 		if m.paused { return m, generate(m.rate) }

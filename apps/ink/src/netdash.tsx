@@ -88,4 +88,4 @@ function App() {
 }
 
 const inst = render(<App />);
-setInterval(() => emitMetric("flush", { seq: String(Date.now()) }), 50);
+render(<App />);

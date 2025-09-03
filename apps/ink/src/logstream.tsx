@@ -1,6 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { render, Box, Text, useInput } from "ink";
-import { wrapStdout, summary, emitMetric } from "./instrument/ioWrap";
+import {
+  wrapStdout,
+  summary,
+  emitMetric,
+  setPendingFlushSeq,
+} from "./instrument/ioWrap";
 
 wrapStdout();
 
@@ -50,11 +55,13 @@ function App() {
     }
     if (input === " ") paused.current = !paused.current;
     // State change example
-    if (input === " ")
+    if (input === " ") {
       emitMetric("state", { field: "paused", value: paused.current, seq: s });
+      setPendingFlushSeq(s);
+    }
   });
 
-  const lines = useMemo(() => {
+  const lines = useMemo((): string[] => {
     const start = Math.max(0, buf.length - 200);
     return buf.slice(start);
   }, [buf]);
@@ -71,9 +78,4 @@ function App() {
   );
 }
 
-const instance = render(<App />);
-// After each render frame, schedule a flush mark tied to the latest seq
-// This is approximate but good enough to correlate input->flush at frame granularity
-setInterval(() => {
-  emitMetric("flush", { seq: String(Date.now()) });
-}, 50);
+render(<App />);

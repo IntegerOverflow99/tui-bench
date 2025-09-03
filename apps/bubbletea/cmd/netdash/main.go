@@ -56,7 +56,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         // render
         content := m.render()
         m.vp.SetContent(content)
-        instrument.Emit("flush", map[string]any{"seq": fmt.Sprintf("%d", m.seq)})
         return m, tickCmd()
     case sample:
         if msg.err != nil { m.errc++ } else {
