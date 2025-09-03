@@ -1,0 +1,53 @@
+# OS / Editors
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.code-workspace
+
+# General logs / temp
+*.log
+logs/
+tmp/
+.tmp/
+temp/
+
+# Environment files
+.env
+.env.*.local
+
+# Go
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.out
+
+# Project-specific Go binaries (built locally)
+bench/benchctl
+apps/bubbletea/cmd/logstream/logstream
+apps/bubbletea/cmd/netdash/netdash
+
+# Node / TypeScript
+node_modules/
+apps/ink/node_modules/
+dist/
+apps/ink/dist/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon?
+.Spotlight-V100
+.Trashes
