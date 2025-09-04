@@ -31,8 +31,9 @@ coverage.out
 
 # Project-specific Go binaries (built locally)
 bench/benchctl
-apps/bubbletea/cmd/logstream/logstream
-apps/bubbletea/cmd/netdash/netdash
+apps/bubbletea/logstream
+apps/bubbletea/netdash
+!apps/ink/bin
 
 # Node / TypeScript
 node_modules/

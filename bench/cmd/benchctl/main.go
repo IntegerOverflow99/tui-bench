@@ -121,6 +121,24 @@ func main() {
 
 	time.Sleep(warmup)
 	agg.Start()
+
+	// For netdash scenario, inject 't' keypresses periodically during the measurement window
+	if scenario == "netdash" {
+		go func() {
+			// Press immediately at measurement start, then every second
+			_, _ = io.WriteString(tty, "t")
+			ticker := time.NewTicker(1 * time.Second)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-ticker.C:
+					_, _ = io.WriteString(tty, "t")
+				}
+			}
+		}()
+	}
 	time.Sleep(dur)
 	agg.Stop()
 	cancel()

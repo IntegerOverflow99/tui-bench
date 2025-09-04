@@ -1,6 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { render, Box, Text, useInput } from "ink";
-import { wrapStdout, summary, emitMetric } from "./instrument/ioWrap";
+import {
+  wrapStdout,
+  summary,
+  emitMetric,
+  setPendingFlushSeq,
+} from "./instrument/ioWrap";
 
 wrapStdout();
 
@@ -26,6 +31,7 @@ function App() {
   const [lat, setLat] = useState<number[]>([]);
   const [errs, setErrs] = useState(0);
   const seq = useRef(0);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     let alive = true;
@@ -64,6 +70,12 @@ function App() {
       summary({ errors: errs });
       process.exit(0);
     }
+    if (input === "t") {
+      const next = theme === "dark" ? "light" : "dark";
+      setTheme(next);
+      emitMetric("state", { field: "theme", value: next, seq: s });
+      setPendingFlushSeq(s);
+    }
   });
 
   const spark = useMemo(() => bars(lat), [lat]);
@@ -76,7 +88,7 @@ function App() {
   return (
     <Box flexDirection="column">
       <Text>
-        Netdash {URL} errors={errs}
+        Netdash {URL} theme={theme} errors={errs}
       </Text>
       <Text>latency(ms)</Text>
       <Text>{spark}</Text>

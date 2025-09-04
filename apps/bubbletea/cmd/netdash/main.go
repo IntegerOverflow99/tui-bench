@@ -22,6 +22,7 @@ type model struct {
     errc    int
     period  time.Duration
     seq     int
+    theme   string // "light" or "dark"
 }
 
 type tick struct{}
@@ -51,7 +52,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         m.seq++
         seq := fmt.Sprintf("%d", m.seq)
         instrument.Emit("input", map[string]any{"key": msg.String(), "seq": seq})
-        if msg.String() == "ctrl+c" || msg.String() == "q" { return m, tea.Quit }
+        switch msg.String() {
+        case "ctrl+c", "q":
+            return m, tea.Quit
+        case "t":
+            if m.theme == "dark" { m.theme = "light" } else { m.theme = "dark" }
+            instrument.Emit("state", map[string]any{"field": "theme", "value": m.theme, "seq": seq})
+            instrument.SetPendingFlushSeq(seq)
+        }
     case tick:
         // render
         content := m.render()
@@ -72,14 +80,14 @@ func (m model) View() string { return m.vp.View() }
 func (m model) render() string {
     // sparkline over last N latencies in ms
     if len(m.lat) == 0 {
-        return fmt.Sprintf("Netdash %s\n(no data yet)\nerrors=%d", m.url, m.errc)
+    return fmt.Sprintf("Netdash %s theme=%s\n(no data yet)\nerrors=%d", m.url, m.theme, m.errc)
     }
     ms := make([]float64, len(m.lat))
     max := 1.0
     for i, d := range m.lat { v := float64(d.Milliseconds()); ms[i] = v; if v > max { max = v } }
     bars := []rune("▁▂▃▄▅▆▇█")
     var b strings.Builder
-    b.WriteString(fmt.Sprintf("Netdash %s period=%s errors=%d\n", m.url, m.period, m.errc))
+    b.WriteString(fmt.Sprintf("Netdash %s theme=%s period=%s errors=%d\n", m.url, m.theme, m.period, m.errc))
     b.WriteString("latency(ms)\n")
     for _, v := range ms {
         idx := int((v/max)*float64(len(bars)-1) + 0.5)
@@ -108,6 +116,7 @@ func main() {
         url:    url,
         maxN:   80,
         period: time.Duration(periodMs) * time.Millisecond,
+    theme:  "light",
     }
 
     cw := &instrument.CountingWriter{W: os.Stdout}
